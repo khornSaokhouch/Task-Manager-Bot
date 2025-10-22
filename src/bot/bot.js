@@ -1,9 +1,9 @@
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
-const LocalSession = require('telegraf-session-local');
 const mongoose = require('mongoose');
+const LocalSession = require('telegraf-session-local');
 
-// === Connect to MongoDB ===
+// === MongoDB Connection ===
 let isConnected = false;
 async function connectDB() {
   if (!isConnected) {
@@ -16,15 +16,10 @@ async function connectDB() {
 // === Initialize bot ===
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// === Persistent session ===
-const localSession = new LocalSession({
-  database: 'sessions.json',
-  property: 'session',
-  ttl: 3600,
-});
-bot.use(localSession.middleware());
+// === Local session ===
+bot.use(new LocalSession({ database: 'sessions.json' }).middleware());
 
-// === Import and register commands ===
+// === Import commands ===
 const registerCommand = require('../commands/register');
 const addTaskCommand = require('../commands/addtask');
 const assignTaskCommand = require('../commands/assigntask');
@@ -32,6 +27,7 @@ const myTasksCommand = require('../commands/mytasks');
 const completeTaskCommand = require('../commands/completetask');
 const commentCommand = require('../commands/comment');
 
+// === Register commands ===
 registerCommand(bot);
 addTaskCommand(bot);
 assignTaskCommand(bot);
@@ -39,7 +35,7 @@ myTasksCommand(bot);
 completeTaskCommand(bot);
 commentCommand(bot);
 
-// === Export serverless function for Vercel ===
+// === Export serverless function ===
 module.exports = async (req, res) => {
   await connectDB();
 
